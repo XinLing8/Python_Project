@@ -1,0 +1,310 @@
+#CreateSuperUser_data
+FUNCTION CreateSuperUser_data
+	DEFINE a list named SuperUser_data with single string 'superuser,superpass'
+	OPEN file 'SuperUser.txt' in write mode
+		FOR each line in SuperUser_data
+			WRITE the item to the file followed by a newline
+		CLOSE file
+		PRINT "Super User data file created with initial data."
+
+
+#read_file		
+FUNCTION read_file
+TRY
+	OPEN file 'SuperUser.txt' in read mode
+	READ content of file
+	PRINT "File content:"
+	PRINT content
+	CLOSE the file
+EXCEPT FileNotFoundError
+	PRINT "File not found."
+	
+	
+#SuperUser_login
+FUNCTION SuperUser_login
+	SET max_attempts TO 3
+	SET attempts TO 0
+	
+	WHILE attempts < max_attempts
+		PROMPT user for Super User ID
+		READ superuser_id
+		PROMPT user for password
+		READ password
+		
+		SET valid_login TO False
+		
+		TRY
+			OPEN file 'SuperUser.txt' in read mode
+				FOR each line in file
+					SPLIT line into stored_superuser_id AND store_password
+					IF stored_superuser_id matches superuser_id AND stored_password matches password
+						SET valid_login TO True
+						BREAK loop
+		EXCEPT FileNotFoundError
+			PRINT "User data file not found."
+			RETURN
+			
+		IF valid_login
+			PRINT "Login successful."
+			CALL SuperUser_menu with superuser_id
+			RETURN
+		ELSE
+			INCREMENT attempts
+			PRINT number of attempts left
+			
+	PRINT "Too many failed attempts. Access denied."
+	CALL reset_superuser_password with superuser_id
+
+	
+#reset_superuser_password
+FUNCTION reset_superuser_password(superuser_id)
+
+	TRY
+		OPEN file 'SuperUser.txt' in read mode
+			READ all lines into superusers
+	EXCEPT FileNotError
+		PRINT "User data file not found."
+		RETURN
+		
+	FOR each line in superusers with index i
+		SPLIT line into stored_superuser_id
+		IF stored_superuser_id matches superuser_id
+			WHILE True
+				PROMPT user for new password
+				READ new_password
+				
+				CHECK if new_password meets length and character requierments
+				IF new_password is valid
+                    UPDATE superusers[i] with new_password
+                    OPEN file 'SuperUser.txt' in write mode
+                        WRITE updated superusers
+                    PRINT "Password reset successfully."
+                    RETURN
+                ELSE
+                    PRINT validation error messages
+    PRINT "SuperUser ID not found."
+
+#Verify_New_Users	
+FUNCTION Verify_New_Users
+	TRY
+		OPEN 'users.txt' in read mode
+			READ all lines into users
+	EXCEPT FileNotFoundError
+		RETURN
+		
+	SET pending_users TO users where status is "pending"
+	
+	IF pending_users is empty
+        PRINT "No pending users to verify."
+        RETURN
+
+    FOR each user in pending_users with index i
+        PRINT user details
+
+    LOG action with superuser_id and "Verify New Users"
+
+    WHILE True
+        PROMPT user for decision (Y/N)
+        IF decision is valid
+            BREAK loop
+        PRINT invalid choice message
+
+    IF decision is 'Y'
+        CALL Add_User
+    ELSE
+        PRINT "No users were processed."
+
+#Add_User		
+FUNCTION Add_User
+    LOG action with superuser_id and "Add User"
+    TRY
+        OPEN 'users.txt' in read mode
+            READ all lines into users
+    EXCEPT FileNotFoundError
+        RETURN
+
+    SET pending_users TO users where status is "pending"
+
+    IF pending_users is empty
+        PRINT "No pending users to add."
+        RETURN
+
+    FOR each user in pending_users with index i
+        PRINT user details
+
+        WHILE True
+            PROMPT user for decision (A/R)
+            IF decision is valid
+                BREAK loop
+            PRINT invalid choice message
+
+        IF decision is 'A'
+            WHILE True
+                PROMPT user for role (S/A)
+                IF role is valid
+                    BREAK loop
+                PRINT invalid role message
+
+            UPDATE user status to "approved" and save user
+            CALL save_user_to_file
+            PRINT success message
+        ELSE
+            UPDATE user status to "rejected"
+            PRINT rejection message
+
+    TRY
+        OPEN 'users.txt' in write mode
+            WRITE updated users
+    EXCEPT Exception as e
+        PRINT error message
+
+#save_user_to_file		
+FUNCTION save_user_to_file(username, password, ic, role)
+    IF role is 'staff'
+        SET file_path TO 'staff.txt'
+    ELSE IF role is 'admin'
+        SET file_path TO 'admin.txt'
+	ELSE IF role is 'customer'
+        SET file_path TO 'customers.txt'
+    ELSE
+        RETURN
+
+    TRY
+        OPEN file_path in append mode
+            WRITE user details
+    EXCEPT Exception as e
+        PRINT error message
+		
+#Modify_User_Details
+FUNCTION Modify_User_Details
+    LOG action with superuser_id and "Modify User Details"
+    TRY
+        OPEN 'users.txt' in read mode
+            READ all lines into users
+    EXCEPT FileNotFoundError
+        RETURN
+
+    SET user_dict TO dictionary of username to user details
+
+    IF user_dict is empty
+        PRINT "No valid users found."
+        RETURN
+
+    FOR each user in user_dict
+        PRINT user details
+
+    PROMPT user for selection
+    IF selection is valid
+        UPDATE user details
+        WRITE updated user details to 'users.txt'
+        PRINT success message
+    ELSE
+        PRINT invalid selection message
+		
+#Disable_User_access
+FUNCTION Disable_User_Access
+    SET file_map TO dictionary of role choices to file paths
+
+    PRINT role choices
+
+    WHILE True
+        PROMPT user for role choice
+        IF choice is valid
+            BREAK loop
+		ELSE
+			PRINT invalid choice message
+
+    SET file_path TO selected file path
+    TRY
+        OPEN file_path in read mode
+            READ all lines into users
+    EXCEPT FileNotFoundError
+        RETURN
+
+    IF users is empty
+        PRINT "No users found."
+	ELSE
+        RETURN
+
+    PRINT user details
+
+    WHILE True
+        PROMPT user for user choice
+        IF choice is valid
+            BREAK loop
+		ELSE
+			PRINT invalid choice message
+
+    UPDATE selected user status to "disabled"
+    TRY
+        OPEN file_path in write mode
+            WRITE updated users
+        PRINT success message
+        LOG action with superuser_id and role
+        PRINT error message
+
+#Inquiry_System_Usage
+FUNCTION Inquiry_System_Usage(superuser_id)
+    LOAD data from 'reports.txt'
+    
+    IF reports is empty
+        PRINT "No reports found."
+        RETURN
+    
+    FOR each username in reports
+        PRINT username and their reports
+
+    LOG action with superuser_id and "Inquired system usage report"
+	
+#Check_Customer_Order_Status
+FUNCTION Check_Customer_Order_Status(superuser_id)
+    LOG action with superuser_id and "Check customer order status"
+    LOAD orders from 'orders.txt'
+
+    IF orders is empty
+        PRINT "No orders found."
+        RETURN
+
+    PROMPT user for order ID
+
+    IF order ID is in orders
+        PRINT order details
+        LOG action with username and order ID
+    ELSE
+        PRINT "Order not found."
+
+#Super_View_Reports
+FUNCTION Superuser_View_Reports(superuser_id)
+    LOG action with superuser_id and "View Reports"
+    LOAD data from 'reports.txt'
+
+    IF reports is empty
+        PRINT "No reports found."
+        RETURN
+    
+    FOR each superuser_id in reports
+        PRINT superuser_id and their reports
+
+    PROMPT user to return to main menu
+	
+#View_All_Feedback
+FUNCTION view_all_feedback(superuser_id)
+    LOG action with superuser_id and "View Feedback"
+    LOAD data from 'feedback.json'
+    
+    FOR each feedback in feedback_data
+        IF feedback is valid
+            PRINT feedback details
+        ELSE
+            PRINT unexpected data format message
+
+#SuperUser_menu
+FUNCTION SuperUser_menu(superuser_id)
+	DISPLAY menu options for the Super User
+	PROMPT user for menu choice
+	READ choice
+	
+	IF choice is valid
+		PERFORM action based on choice
+	ELSE 
+		PRINT invalid choice message

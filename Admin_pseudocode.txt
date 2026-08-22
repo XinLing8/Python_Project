@@ -1,0 +1,240 @@
+PROCEDURE admin_interface
+    WHILE True
+        DISPLAY "Admin Interface Menu"
+        DISPLAY "1. Login"
+        DISPLAY "2. Signup"
+        DISPLAY "3. Exit"
+        
+        INPUT choice
+        
+        IF choice IS '1' THEN
+            CALL Admin_Login
+        
+        ELSE IF choice IS '2' THEN
+            CALL Admin_Signup
+        
+        ELSE IF choice IS '3' THEN
+            DISPLAY "Exiting..."
+            CALL homepage
+            BREAK
+        
+        ELSE
+            DISPLAY "Invalid option. Please choose again."
+    END WHILE
+END PROCEDURE
+
+PROCEDURE Admin_Login
+    SET max_attempts TO 3
+    SET attempts TO 0
+
+    DISPLAY "Admin Login Page"
+    
+    WHILE attempts < max_attempts
+        INPUT username
+        INPUT password
+        
+        DISPLAY "Attempting login with username: username"
+        
+        IF verify_Admincredentials(username, password, active, "admin.txt") IS True THEN
+            DISPLAY "Login successful! Welcome, username"
+            CALL admin_menu(username)
+            RETURN
+        
+        ELSE
+            INCREMENT attempts
+            DISPLAY "Wrong username or password. attempts_left attempts left."
+    
+    DISPLAY "Too many failed attempts. Please reset your password."
+    CALL reset_admin_password(username, "admin.txt")
+    
+    CALL main_menu
+END PROCEDURE
+
+PROCEDURE Admin_Signup
+    SET role TO "admin"
+    SET status TO "pending"
+
+    DISPLAY "Admin Registration Page"
+    
+    WHILE True
+        INPUT username
+        
+        IF NOT check_username(username, "admin.txt") THEN
+            BREAK
+        ELSE
+            DISPLAY "Username already exists. Please try another one."
+    
+    WHILE True
+        INPUT password
+        
+        CALL check_password(password) RETURNS valid, message
+        
+        IF valid THEN
+            INPUT verify_pw
+            
+            IF verify_pw EQUALS password THEN
+                DISPLAY "-Password match-"
+                BREAK
+            ELSE
+                DISPLAY "Passwords do not match. Please try again."
+        ELSE
+            DISPLAY message
+    
+    CALL save_pendingAdmin(username, password, role, status, "users.txt")
+    DISPLAY "Your registration is pending to be approved."
+    DISPLAY "You will be returned to Homepage."
+    
+    CALL admin_interface
+END PROCEDURE
+
+PROCEDURE save_pendingAdmin(username, password, role, status, filename)
+    TRY
+        OPEN 'users.txt' IN APPEND MODE
+        WRITE username, password, role, status TO file
+        CLOSE file
+    CATCH FileNotFoundError
+        RETURN False
+    END TRY
+END PROCEDURE
+
+PROCEDURE reset_admin_password(username, filename)
+    DISPLAY "Reset Password Page"
+    
+    SET attempt_count TO 0
+    SET max_attempts TO 5
+    
+    WHILE attempt_count < max_attempts
+        INPUT new_password
+        
+        IF password DOES NOT MEET CRITERIA THEN
+            DISPLAY CRITERIA_MESSAGE
+            INCREMENT attempt_count
+            CONTINUE
+        
+        INPUT confirm_password
+        
+        IF new_password NOT EQUAL TO confirm_password THEN
+            DISPLAY "Passwords do not match. Please try again."
+            INCREMENT attempt_count
+            CONTINUE
+        
+        CALL modify_admin_password(username, new_password, filename) RETURNS valid, message
+        
+        IF valid THEN
+            RETURN True, "Password has been reset successfully."
+        ELSE
+            RETURN False, "Failed to reset password. Please try again."
+    
+    RETURN False, "Too many failed attempts. Please contact the system administrator."
+END PROCEDURE
+
+PROCEDURE verify_Admincredentials(username, password, active, filename)
+    DISPLAY "Verifying Admin Credentials..."
+    
+    TRY
+        OPEN filename IN READ MODE
+        
+        FOR EACH line IN file
+            SPLIT line INTO stored_username, stored_password, stored_active
+            
+            IF username EQUALS stored_username AND password EQUALS stored_password AND active EQUALS stored_active THEN
+                DISPLAY "Credentials verified!"
+                RETURN True
+        END FOR
+    CATCH FileNotFoundError
+        RETURN False
+    END TRY
+END PROCEDURE
+
+PROCEDURE Verify_New_Users
+    SET username TO "default_user"
+    CALL log_action(username, "Verify New Users")
+    
+    TRY
+        OPEN 'users.txt' IN READ MODE
+        SET users TO READ ALL LINES FROM file
+        CLOSE file
+    CATCH FileNotFoundError
+        DISPLAY "No users to verify."
+        RETURN
+    
+    SET pending_users TO FILTER users WHERE status IS "pending"
+    
+    IF pending_users IS EMPTY THEN
+        DISPLAY "No pending users to verify."
+        RETURN
+    
+    FOR EACH user IN pending_users
+        SPLIT user INTO username, password, ic, role, status
+        DISPLAY user details
+    
+    WHILE True
+        INPUT decision
+        IF decision IS 'Y' OR 'N' THEN
+            BREAK
+        ELSE
+            DISPLAY "Invalid choice. Please enter 'Y' for Yes or 'N' for No."
+    
+    IF decision EQUALS 'Y' THEN
+        CALL Add_User
+    ELSE
+        DISPLAY "No users were processed."
+END PROCEDURE
+
+PROCEDURE Admin_View_Reports(username)
+    CALL log_action(username, "View Reports")
+    SET reports TO load_data(REPORTS_FILE)
+    
+    IF reports IS EMPTY THEN
+        DISPLAY "No reports found."
+    ELSE
+        FOR EACH username, actions IN reports
+            DISPLAY reports for each username and action
+    
+    INPUT "Press Enter to return to the main menu..."
+END PROCEDURE
+
+PROCEDURE view_all_feedback(username)
+    CALL log_action(username, "View Feedback")
+    SET feedback_data TO load_data('feedback.json')
+    
+    FOR EACH feedback IN feedback_data
+        IF feedback IS dictionary THEN
+            DISPLAY feedback details
+        ELSE
+            DISPLAY "Unexpected data format."
+END PROCEDURE
+
+PROCEDURE Admin_menu
+    SET username TO "default_user"
+    CALL log_action(username, "Login")
+    
+    WHILE True
+        DISPLAY "Admin Menu"
+        DISPLAY "1. Approve/Reject User Registrations"
+        DISPLAY "2. View Reports"
+        DISPLAY "3. View Feedback"
+        DISPLAY "4. Logout"
+        
+        INPUT choice
+        
+        IF choice EQUALS '1' THEN
+            DISPLAY "Approve/Reject User Registration"
+            CALL Verify_New_Users
+        
+        ELSE IF choice EQUALS '2' THEN
+            DISPLAY "View Reports"
+            CALL Superuser_View_Reports(username)
+        
+        ELSE IF choice EQUALS '3' THEN
+            DISPLAY "View Feedback"
+            CALL view_all_feedback(username)
+        
+        ELSE IF choice EQUALS '4' THEN
+            DISPLAY "Logout"
+            BREAK
+        
+        ELSE
+            DISPLAY "Invalid option. Please choose again."
+            CALL log_action(username, "Logout")
+END PROCEDURE

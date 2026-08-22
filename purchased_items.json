@@ -1,0 +1,66 @@
+[
+    {
+        "username": "abcd",
+        "items": [
+            {
+                "item": "Laptop",
+                "quantity": 1,
+                "price": 4000,
+                "total_cost": 4000
+            },
+            {
+                "item": "Mouse",
+                "quantity": 2,
+                "price": 80,
+                "total_cost": 160
+            }
+        ],
+        "total_cost": 4160,
+        "status": "Paid"
+    },
+    {
+        "username": "abcd",
+        "items": [
+            {
+                "item": "Laptop",
+                "quantity": 1,
+                "price": 4000,
+                "total_cost": 4000
+            },
+            {
+                "item": "Mouse",
+                "quantity": 2,
+                "price": 80,
+                "total_cost": 160
+            }
+        ],
+        "total_cost": 4160,
+        "status": "Unpaid"
+    },
+    {
+        "username": "Alice",
+        "items": [
+            {
+                "item": "Laptop",
+                "quantity": 1,
+                "price": 4000,
+                "total_cost": 4000
+            }
+        ],
+        "total_cost": 4000,
+        "status": "Paid"
+    },
+    {
+        "username": "Alice",
+        "items": [
+            {
+                "item": "Laptop",
+                "quantity": 9,
+                "price": 4000,
+                "total_cost": 36000
+            }
+        ],
+        "total_cost": 36000,
+        "status": "Paid"
+    }
+]

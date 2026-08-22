@@ -1,0 +1,18 @@
+{
+    "Device Repair": {
+        "tentative_time": "2-4 days",
+        "service_price": 100
+    },
+    "Software Installation": {
+        "tentative_time": "1 days",
+        "service_price": 200
+    },
+    "Hardware Upgrade": {
+        "tentative_time": "2-3 days",
+        "service_price": 250
+    },
+    "Computer Repair": {
+        "tentative_time": "4-5 days",
+        "service_price": 250.0
+    }
+}

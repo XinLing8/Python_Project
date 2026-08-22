@@ -1,0 +1,6 @@
+abcd,Abcd@123,10203040506,staff,approved
+staff1,Staff@456,9876543210,staff,approved
+bello,Bello@789,789456123,staff,approved
+Alice,Alice@123
+Mary,Mary@1234,customer,pending
+Staff5,Staff@0505,986532741,staff,pending

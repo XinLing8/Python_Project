@@ -1,0 +1,37 @@
+{
+    "Desktop": {
+        "quantity": 36,
+        "price": 2500,
+        "for_staff_only": false
+    },
+    "Laptop": {
+        "quantity": 33,
+        "price": 4000,
+        "for_staff_only": false
+    },
+    "Mouse": {
+        "quantity": 14,
+        "price": 80,
+        "for_staff_only": false
+    },
+    "Keyboard": {
+        "quantity": 21,
+        "price": 150,
+        "for_staff_only": false
+    },
+    "Monitor": {
+        "quantity": 10,
+        "price": 500,
+        "for_staff_only": false
+    },
+    "Charger": {
+        "quantity": 12,
+        "price": 100,
+        "for_staff_only": false
+    },
+    "CPU": {
+        "quantity": 54,
+        "price": 500,
+        "for_staff_only": true
+    }
+}

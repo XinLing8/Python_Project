@@ -1,0 +1,26 @@
+[
+    {
+        "username": "abcd",
+        "rating": 3,
+        "comments": "good",
+        "date": "2024-08-14 21:54:27"
+    },
+    {
+        "username": "abcd",
+        "rating": 5,
+        "comments": "good",
+        "date": "2024-08-14 21:57:00"
+    },
+    {
+        "username": "abcd",
+        "rating": 5,
+        "comments": "bagus ",
+        "date": "2024-08-14 21:57:11"
+    },
+    {
+        "username": "Lily",
+        "rating": 4,
+        "comments": "Good",
+        "date": "2024-08-16 05:13:26"
+    }
+]
